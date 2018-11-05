@@ -1,11 +1,11 @@
 data Formula =V Int
                | C Int
-			         | Not Formula
-			         | Conj {
+               | Not Formula
+               | Conj {
                         l :: Formula ,
                         r :: Formula
                       }
-			         | Disj {
+               | Disj {
                         l :: Formula ,
                         r ::  Formula
                       }
@@ -14,7 +14,27 @@ data Equation = Eq {
                       le :: Formula ,
                       re :: Formula
                    }
-	deriving (Show,Eq,Read)
+      deriving (Show,Eq,Read)
+data Instruction = L | R | N 
+     deriving(Show,Eq,Read)   
+type Path = [Instruction]    
+data Tree = Condition {
+                          c :: Formula,
+                          p :: Path,
+                          left :: Tree,
+                          right :: Tree
+                      }
+           | Leaf Path
+           | Node {
+                       c:: Formula,
+                       p:: Path,
+                       next:: Tree,
+                       e:: [Equation]
+
+                  }   
+     deriving (Show,Eq,Read)                           
+
+
 eqToSys :: Equation ->[Equation]
 eqToSys a@(Eq (V x) y) = [a]
 eqToSys a@(Eq (C x) y) = [a]
