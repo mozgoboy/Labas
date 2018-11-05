@@ -26,3 +26,4 @@ eqToSys (Eq (Conj x1 x2) (Conj y1 y2)) = eqToSys (Eq x1 y1) ++ eqToSys (Eq x2 y2
 eqToSys _ =[]
 
 --TEST
+--test1
