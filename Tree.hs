@@ -9,14 +9,14 @@ data Formula =V Int
                         l :: Formula ,
                         r ::  Formula
                       }
-    deriving (Show,Eq,Read)
+      deriving (Show,Eq,Read)
 data Equation = Eq {
                       le :: Formula ,
                       re :: Formula
                    }
       deriving (Show,Eq,Read)
 data Instruction = L | R | N
-     deriving(Show,Eq,Read)
+      deriving(Show,Eq,Read)
 type Path = [Instruction]
 data Tree = Condition {
                           c :: Formula,
@@ -32,8 +32,7 @@ data Tree = Condition {
                        e:: [Equation]
 
                   }
-     deriving (Show,Eq,Read)
-
+       deriving (Show,Eq,Read)
 
 eqToSys :: Equation ->[Equation]
 eqToSys a@(Eq (V x) y) = [a]
@@ -44,4 +43,3 @@ eqToSys (Eq (Not x) (Not y)) = [Eq x y]
 eqToSys (Eq (Disj x1 x2) (Disj y1 y2)) = eqToSys (Eq x1 y1) ++ eqToSys (Eq x2 y2)
 eqToSys (Eq (Conj x1 x2) (Conj y1 y2)) = eqToSys (Eq x1 y1) ++ eqToSys (Eq x2 y2)
 eqToSys _ =[]
-
