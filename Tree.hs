@@ -15,9 +15,9 @@ data Equation = Eq {
                       re :: Formula
                    }
       deriving (Show,Eq,Read)
-data Instruction = L | R | N 
-     deriving(Show,Eq,Read)   
-type Path = [Instruction]    
+data Instruction = L | R | N
+     deriving(Show,Eq,Read)
+type Path = [Instruction]
 data Tree = Condition {
                           c :: Formula,
                           p :: Path,
@@ -31,8 +31,8 @@ data Tree = Condition {
                        next:: Tree,
                        e:: [Equation]
 
-                  }   
-     deriving (Show,Eq,Read)                           
+                  }
+     deriving (Show,Eq,Read)
 
 
 eqToSys :: Equation ->[Equation]
@@ -45,3 +45,4 @@ eqToSys (Eq (Disj x1 x2) (Disj y1 y2)) = eqToSys (Eq x1 y1) ++ eqToSys (Eq x2 y2
 eqToSys (Eq (Conj x1 x2) (Conj y1 y2)) = eqToSys (Eq x1 y1) ++ eqToSys (Eq x2 y2)
 eqToSys _ =[]
 
+--
