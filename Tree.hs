@@ -70,3 +70,17 @@ eqToSys (Eq (Not x) (Not y)) = [Eq x y]
 eqToSys (Eq (Disj x1 x2) (Disj y1 y2)) = eqToSys (Eq x1 y1) ++ eqToSys (Eq x2 y2)
 eqToSys (Eq (Conj x1 x2) (Conj y1 y2)) = eqToSys (Eq x1 y1) ++ eqToSys (Eq x2 y2)
 eqToSys _ =[]
+
+
+
+putInFormula :: Equation -> Formula -> Formula
+putInFormula _ (C z) = (C z)
+putInFormula (Eq (V x) y) (V z) | z==x = y
+                           | otherwise = V z
+putInFormula x (Not f)= Not (putInFormula x f)
+putInFormula x (Disj f g)= Disj (putInFormula x f) (putInFormula x g)
+putInFormula x (Conj f g)= Conj (putInFormula x f) (putInFormula x g)
+
+
+putInEq :: Equation -> Equation -> Equation
+putInEq x (Eq y z) = Eq (putInFormula x y) (putInFormula x z)                         
