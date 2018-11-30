@@ -2,6 +2,7 @@
 \usepackage[utf8x]{inputenc}
 \usepackage[russian]{babel}
 \usepackage{amsmath}
+\usepackage{comment}
 \usepackage{amsfonts}
 \usepackage[unicode, pdftex]{hyperref}
 \usepackage{xcolor}
@@ -136,10 +137,11 @@
      {\bf Def. 9} Пусть $TRUE$ - истина, $FALSE$ - ложь, $NOTDEF$ - неопределенность.
      \\
      
-     \hypertarget{a4}{{\bf Алгоритм 4}} Алгоритм проверки синтаксического равенства $f == g $ при известных $ X_{i} = \left\lbrace x_{i_{1}} ......x_{i_{n}}\right\rbrace $:
+     \hypertarget{a4}{{\bf Алгоритм 4}} Алгоритм проверки синтаксического равенства $f == g $ при известных $ X_{i} = \left\lbrace x_{i_{1}} ......x_{i_{n}}\right\rbrace $: 
      
+\begin{comment}     
      Шаг 0. Если $Len(f) \neq Len(g)$, то $FALSE$, иначе переходим к шагу 1.
-     
+\end{comment}     
      Шаг 1. Решаем уравнение $(f,g)$ по \hyperlink{a1}{ \textcolor{red} {Алгоритму 1}}.  Получаем  $T = \lbrace  t_{i}  \rbrace_{i=1}^{n} $- систему простейших. Если  $ T= {\emptyset}$, то $FALSE$.
      
      Шаг 2. $\forall i$ удаляем $c_{i} = c_{i}$; 
