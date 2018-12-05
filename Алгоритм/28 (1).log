@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2018.11.20)  2 DEC 2018 22:32
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (MiKTeX 2.9.6840 64-bit) (preloaded format=pdflatex 2018.11.20)  5 DEC 2018 16:55
 entering extended mode
 **"./28 (1).tex"
 ("28 (1).tex"
@@ -376,17 +376,17 @@ Underfull \hbox (badness 10000) in paragraph at lines 30--32
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 37--39
+Underfull \hbox (badness 10000) in paragraph at lines 39--41
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 50--52
+Underfull \hbox (badness 10000) in paragraph at lines 52--54
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 68--70
+Underfull \hbox (badness 10000) in paragraph at lines 70--72
 
  []
 
@@ -394,83 +394,106 @@ Underfull \hbox (badness 10000) in paragraph at lines 68--70
 
 {C:/Users/Admin/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}]
 Excluding 'comment' comment.
-Underfull \hbox (badness 10000) in paragraph at lines 81--97
+Underfull \hbox (badness 10000) in paragraph at lines 83--99
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 81--97
+Underfull \hbox (badness 10000) in paragraph at lines 83--99
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 102--104
+Underfull \hbox (badness 10000) in paragraph at lines 104--106
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 117--119
+Underfull \hbox (badness 10000) in paragraph at lines 119--121
 
  []
 
 [2]
-Underfull \hbox (badness 10000) in paragraph at lines 135--137
+Underfull \hbox (badness 10000) in paragraph at lines 137--139
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 138--140
+Underfull \hbox (badness 10000) in paragraph at lines 140--142
 
  []
 
 Excluding 'comment' comment.
-Underfull \hbox (badness 10000) in paragraph at lines 154--156
+Underfull \hbox (badness 10000) in paragraph at lines 156--158
 
  []
 
 Excluding 'comment' comment. Excluding 'comment' comment.
-Underfull \hbox (badness 10000) in paragraph at lines 175--177
+Underfull \hbox (badness 10000) in paragraph at lines 177--179
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 178--181
+Underfull \hbox (badness 10000) in paragraph at lines 183--186
 
  []
 
 [3]
-Underfull \hbox (badness 10000) in paragraph at lines 182--185
+Underfull \hbox (badness 10000) in paragraph at lines 187--190
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 186--189
+Underfull \hbox (badness 10000) in paragraph at lines 191--194
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 190--193
+Underfull \hbox (badness 10000) in paragraph at lines 195--198
 
  []
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 213.
+
+Underfull \hbox (badness 10000) in paragraph at lines 226--228
+
+ []
+
+
+Overfull \hbox (1.43059pt too wide) in paragraph at lines 231--232
+[]\T2A/cmr/m/n/12 ѕусть $\OML/cmm/m/it/12 v$ \T2A/cmr/m/n/12 те-ку-ща€ вер-ши-н
+а усло-ви€. ѕусть $\OML/cmm/m/it/12 \OT1/cmr/m/n/12 (\OML/cmm/m/it/12 v\OT1/cm
+r/m/n/12 ) = (\OML/cmm/m/it/12 v[]; v[]\OT1/cmr/m/n/12 )$\T2A/cmr/m/n/12 . ѕуст
+ь $\OML/cmm/m/it/12 \OT1/cmr/m/n/12 (\OML/cmm/m/it/12 w\OT1/cmr/m/n/12 ) =
+ []
+
 [4]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 213.
+Underfull \hbox (badness 10000) in paragraph at lines 239--241
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 244--246
+
+ []
+
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 266.
+[5]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 266.
  ("28 (1).aux")
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 213.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 213.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 266.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 266.
 Package rerunfilecheck Info: File `"28 (1)".out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 213.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 266.
  ) 
 Here is how much of TeX's memory you used:
- 10960 strings out of 492970
- 149258 string characters out of 3135854
+ 10966 strings out of 492970
+ 149287 string characters out of 3135854
  236923 words of memory out of 3000000
- 14743 multiletter control sequences out of 15000+200000
+ 14744 multiletter control sequences out of 15000+200000
  9906 words of font info for 34 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 28i,8n,35p,716b,570s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 28i,8n,35p,749b,570s stack positions out of 5000i,500n,10000p,200000b,50000s
  <C:\Users\Admin\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\lh\lh-t2a\dpi600\la
 rm1200.pk> <C:\Users\Admin\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\lh\lh-t2a\d
 pi600\labx1200.pk><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/c
@@ -482,9 +505,9 @@ ram Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Program Files
 pe1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/publ
 ic/amsfonts/cm/cmsy8.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfon
 ts/symbols/msbm10.pfb>
-Output written on "28 (1).pdf" (4 pages, 130445 bytes).
+Output written on "28 (1).pdf" (5 pages, 138542 bytes).
 PDF statistics:
- 185 PDF objects out of 1000 (max. 8388607)
- 11 named destinations out of 1000 (max. 500000)
+ 209 PDF objects out of 1000 (max. 8388607)
+ 16 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
