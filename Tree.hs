@@ -1,5 +1,6 @@
 import Data.Foldable
-data Formula =V Int
+
+data Formula = V Int
                | C Int
                | Not Formula
                | Conj {
@@ -18,6 +19,20 @@ data Equation = Eq {
                       re :: Formula
                    }
       deriving (Show,Eq,Read)
+
+data Value = T | F | N  deriving (Show, Eq, Read)
+
+data Predicate = Synt Formula Formula
+               | Incl Formula Formula
+               | Func Formula Formula
+      deriving (Show, Eq, Read)
+
+data Condition = P Predicate
+               | Bar   Condition
+               | Wedge Condition Condition
+               | Vee   Condition Condition
+      deriving (Show, Eq, Read)
+
 
 -- Алгоритм 1 сведение к системе простейших
 
@@ -69,9 +84,34 @@ vars f = delpov (vars0 f)
 -- Алгоритм 3 Выражение переменных и констант из уравнения
 
 
-solveEq :: Equation -> Maybe [Equation]
-solveEq e =
-solve1 e | eqToSys e == [] = Nothing
+--solveEq :: Equation -> Maybe [Equation]
+--solveEq e =
+--solve1 e | eqToSys e == [] = Nothing
 
 
---- testststs
+-- Алгоритм 4 Проверка предиката синтаксического равенства (пока только для одного выражения)
+
+syntPred :: Formula -> Formula -> [Equation] -> Value
+syntPred = undefined
+{-syntPred f g e:es | asd == [] = F
+                | e:es == [] && asd' == [] = T
+                | e:es == [] && asd' != [] = N
+                | e:es
+      where asd  = eqToSys (Equation f g)
+            asd' = purge asd
+            purge :: [Equation] -> [Equation]
+            purge [] = []
+            purge a:as = if (l a == r a) then (purge as) else (a : purge as)
+-}
+
+-- Алгоритм 5 Проверка подформульного предиката (пока только для одного выражения)
+
+inclPred :: Formula -> Formula -> [Equation] -> Value
+inclPred f (V    x)     es = syntPred f (V x) es
+inclPred f (C    c)     es = syntPred f (C c) es
+inclPred f (Not  g)     es = inclPred f  g    es
+inclPred f (Conj g1 g2) es | q1 == T || q2 == T = T
+                           | q1 == N || q2 == N = N
+                           | otherwise          = F
+      where q1 = inclPred f g1 es
+            q2 = inclPred f g2 es
