@@ -67,8 +67,3 @@ vars f = delpov (vars0 f)
 
 
 -- Алгоритм 3 Выражение переменных и констант из уравнения
-
-
-solveEq :: Equation -> Maybe [Equation]
-solveEq e =
-solve1 e | eqToSys e == [] = Nothing
