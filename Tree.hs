@@ -72,10 +72,3 @@ vars f = delpov (vars0 f)
 solveEq :: Equation -> Maybe [Equation]
 solveEq e =
 solve1 e | eqToSys e == [] = Nothing
-
-
---- testststs
-
-
-
-----sdfgsdfgsdfgdsfhdsfhadfhadh
