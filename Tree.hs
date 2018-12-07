@@ -19,47 +19,6 @@ data Equation = Eq {
       deriving (Show,Eq,Read)
 
 
-data Instruction = L | R | N
-      deriving(Show,Eq,Read)
-
-type Path = [Instruction]
-
-data Tree = Condition {
-                          c :: Formula,
-                          p :: Path,
-                          left :: Tree,
-                          right :: Tree
-                      }
-           | Leaf Path
-           | Node {
-                       c:: Formula,
-                       p:: Path,
-                       next:: Tree,
-                       e:: [Equation]
-
-                  }
-       deriving (Show,Eq,Read)
-goByPath :: Path -> Tree -> Tree
-goByPath [] a = a
-goByPath (a:as) (Condition _ _ l r)  | a==L = goByPath as l
-                                     | a==R = goByPath as r
-goByPath (a:as) (Node _ _ n _) | a==N = goByPath as n
-
-
-dropLast [a] = []
-dropLast (a:as) = [a] ++ dropLast as
-
-
-getPath :: Tree -> Path
-getPath (Leaf p) = p
-getPath (Condition _ p _ _) = p
-getPath (Node _ p _ _) = p
-
-
-backOneStep :: Tree ->Tree -> Tree
-backOneStep b a | (getPath a)==[] = a
-                | otherwise = goByPath (dropLast (getPath a)) b
-
 
 eqToSys :: Equation ->[Equation]
 eqToSys a@(Eq (V x) y) = [a]
