@@ -19,7 +19,7 @@ data Equation = Eq {
                    }
       deriving (Show,Eq,Read)
 
-
+-- Алгоритм 1 сведение к системе простейших
 
 eqToSys :: Equation ->[Equation]
 eqToSys a@(Eq (V x) y) = [a]
@@ -33,6 +33,24 @@ eqToSys (Eq (Conj x1 x2) (Conj y1 y2)) | (eqToSys (Eq x1 y1)==[]) || (eqToSys (E
                                        | otherwise = eqToSys (Eq x1 y1) ++ eqToSys (Eq x2 y2)
 eqToSys _ =[]
 
+--Подстановка выражения переменной или константы в формулу
+
+putInFormula :: Equation -> Formula -> Formula
+putInFormula _ (C z) = (C z)
+putInFormula (Eq (V x) y) (V z) | z==x = y
+                           | otherwise = V z
+putInFormula (Eq (C x) y) (V z) | z==x = y
+                                | otherwise = V z
+putInFormula x (Not f)= Not (putInFormula x f)
+putInFormula x (Disj f g)= Disj (putInFormula x f) (putInFormula x g)
+putInFormula x (Conj f g)= Conj (putInFormula x f) (putInFormula x g)
+
+--Подстановка выражения переменной или константы в уравнение
+
+putInEq :: Equation -> Equation -> Equation
+putInEq x (Eq y z) = Eq (putInFormula x y) (putInFormula x z)
+
+--Реализация функции Vars
 
 vars :: Formula -> [Formula]
 vars f = delpov (vars0 f)
