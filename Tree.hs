@@ -75,3 +75,7 @@ solve1 e | eqToSys e == [] = Nothing
 
 
 --- testststs
+
+
+
+----sdfgsdfgsdfgdsfhdsfhadfhadh
