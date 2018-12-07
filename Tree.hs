@@ -33,7 +33,7 @@ eqToSys (Eq (Conj x1 x2) (Conj y1 y2)) | (eqToSys (Eq x1 y1)==[]) || (eqToSys (E
                                        | otherwise = eqToSys (Eq x1 y1) ++ eqToSys (Eq x2 y2)
 eqToSys _ =[]
 
---Подстановка выражения переменной или константы в формулу
+--Алгоритм 2 Подстановка выражения переменной или константы в формулу
 
 putInFormula :: Equation -> Formula -> Formula
 putInFormula _ (C z) = (C z)
@@ -64,3 +64,11 @@ vars f = delpov (vars0 f)
    delpov [f] = [f]
    delpov (f:as) | elem f as = (delpov as)
                  | otherwise = [f] ++ (delpov as)
+
+
+-- Алгоритм 3 Выражение переменных и констант из уравнения
+
+
+solveEq :: Equation -> Maybe [Equation]
+solveEq e =
+solve1 e | eqToSys e == [] = Nothing
