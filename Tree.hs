@@ -117,20 +117,63 @@ inclPred f (Conj g1 g2) es | q1 == T || q2 == T = T
             q2 = inclPred f g2 es
 
 
--- Упрощение формулы с использованием эквивалентностей (не стал на всякий случай много чего писать)
+-- Упрощение формулы с использованием эквивалентностей
 
 simplify :: Formula -> (Formula, Int)
--- Не написаны упрощения для формул типа Conj TRUE FALSE и т.д.
+simplify (V x) = (V x, 0)
+simplify (C c) = (C c, 0)
+simplify TRUE  = (TRUE,  0)
+simplify FALSE = (FALSE, 0)
+
+
+simplify (Not  FALSE) = (TRUE,  1)
+simplify (Not  TRUE)  = (FALSE, 1)
+
+simplify (Conj FALSE FALSE) = (FALSE, 1)
+simplify (Conj FALSE TRUE)  = (FALSE, 1)
+simplify (Conj TRUE  FALSE) = (FALSE, 1)
+simplify (Conj TRUE  TRUE)  = (TRUE, 1)
+
+simplify (Disj FALSE FALSE) = (FALSE, 1)
+simplify (Disj FALSE TRUE)  = (TRUE, 1)
+simplify (Disj TRUE  FALSE) = (TRUE, 1)
+simplify (Disj TRUE  TRUE)  = (TRUE, 1)
+
 simplify (Not (Not f))  = (f, 1)
+
 simplify (Conj f TRUE)  = (f, 1)
+simplify (Conj TRUE f)  = (f, 1)
 simplify (Conj f FALSE) = (FALSE, 1)
+simplify (Conj FALSE f) = (FALSE, 1)
+
 simplify (Disj f TRUE)  = (TRUE, 1)
+simplify (Disj TRUE f)  = (TRUE, 1)
 simplify (Disj f FALSE) = (f, 1)
-simplify (Conj f g) | f == g     = (f, 1)
-                    | f == Not g = (FALSE, 1)
-simplify (Disj f g) | f == g     = (f, 1)
-                    | f == Not g = (TRUE, 1)
+simplify (Disj FALSE f) = (f, 1)
+
+simplify (Conj f (Not g))    | f == g = (FALSE, 1)
+simplify (Conj (Not g) f)    = simplify (Conj f (Not g))
+simplify (Disj f (Not g))    | f == g = (TRUE, 1)
+simplify (Disj (Not g) f)    = simplify (Disj f (Not g))
 simplify (Conj f (Disj g h)) | g == f || h == f = (f, 1)
+simplify (Conj (Disj g h) f) = simplify (Conj f (Disj g h))
 simplify (Disj f (Conj g h)) | g == f || h == f = (f, 1)
--- Для всех определений функции выше, кроме 1ой, 6ой и 7о1 надо ещё писать определение для зеркальной ситуации типа Conj TRUE f
-simplify f = (f, 0)
+simplify (Disj (Conj g h) f) = simplify (Disj f (Conj g h))
+
+simplify (Not  f)   = (Not (fst res), snd res) where res = simplify f
+
+simplify (Conj f g) | f == g    = (f, 1)
+                    | otherwise = (Conj (fst resf) (fst resg), max (snd resf) (snd resg))
+      where resf = simplify f
+            resg = simplify g
+
+simplify (Disj f g) | f == g    = (f, 1)
+                    | otherwise = (Disj (fst resf) (fst resg), max (snd resf) (snd resg))
+      where resf = simplify f
+            resg = simplify g
+
+
+fullSimplify :: Formula -> Formula
+fullSimplify f | snd res == 1 = fullSimplify (fst res)
+               | otherwise    = f
+      where res = simplify f
