@@ -70,31 +70,3 @@ vars f = delpov (vars0 f)
 
 
 solveEq :: Equation -> Maybe [Equation]
-solveEq e =
-      where
-      solve1 e | eqToSys e == [] = Nothing
-               | otherwise == Just (eqToSys)
-      solve2 e | check1 e == False = Nothing
-               | otherwise = Just  (del1 e)
-                  where
-
-
-      solve3 Nothing = Nothing
-      solve3 (Just [x]) =Just [x]
-      solve3 (Just (x:xs)) | (check2 x xs) && (solveEq (putInEq (find1 x xs) x) == Nothing) = Nothing
-                           | (check2 x xs) && (solveEq (putInEq (find1 x xs) x) /= Nothing) = solve3 (msum (Just (map putInEq (find1 x xs) xs)) (solveEq (putInEq (find1 x xs) x)))
-                           | otherwise = msum (Just [x]) (solve3 (Just xs))
-                               where
-                                 msum _ Nothing = Nothing
-                                 msum Nothing _ = Nothing
-                                 msum (Just x) (Just y) = Just (x ++ y)
-                                 check2 (Eq (V a) x) [(Eq (V b) y)] | a==b =True
-                                                                    | otherwise = False
-                                 check2 (Eq (V a) x) (x:xs) = (check2 (Eq (V a) x) [x]) || (check2 (Eq (V a) x) xs)
-                                 check2 _ _ =False
-                                 find1 x [] = C 1
-                                 find1 x [y] | check2 x [y] = y
-                                             | otherwise =C 1
-                                 find1 x (y:ys) |  check2 x [y]  = y
-                                                | otherwise = find1 x ys
-      solve4
