@@ -11,6 +11,8 @@ data Formula = V Int
                         l :: Formula ,
                         r ::  Formula
                       }
+              | TRUE
+              | FALSE
       deriving (Show,Eq,Read)
 
 
@@ -115,3 +117,26 @@ inclPred f (Conj g1 g2) es | q1 == T || q2 == T = T
                            | otherwise          = F
       where q1 = inclPred f g1 es
             q2 = inclPred f g2 es
+
+
+-- Упрощение формулы с использованием эквивалентностей (не стал на всякий случай много чего писать)
+
+simplify :: Formula -> (Formula, Int)
+-- Не написаны упрощения для формул типа Conj TRUE FALSE и т.д.
+simplify (Not (Not f))  = (f, 1)
+simplify (Conj f TRUE)  = (f, 1)
+simplify (Conj f FALSE) = (FALSE, 1)
+simplify (Disj f TRUE)  = (TRUE, 1)
+simplify (Disj f FALSE) = (f, 1)
+simplify (Conj f g) | f == g     = (f, 1)
+                    | f == Not g = (FALSE, 1)
+                    | otherwise  = (Conj f g, 0)
+simplify (Disj f g) | f == g     = (f, 1)
+                    | f == Not g = (TRUE, 1)
+                    | otherwise  = (Disj f g, 0)
+simplify (Conj f (Disj g h)) | g == f || h == f = (f, 1)
+                             | otherwise        = (Conj f (Disj g h), 0)
+simplify (Disj f (Conj g h)) | g == f || h == f = (f, 1)
+                             | otherwise        = (Disj f (Conj g h), 0)
+-- Для всех определений функции выше, кроме первой надо ещё писать определение для зеркальной ситуации типа Conj TRUE f
+simplify f = (f, 0)
