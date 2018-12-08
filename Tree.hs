@@ -11,7 +11,7 @@ data Formula = V Int
                         l :: Formula ,
                         r ::  Formula
                       }
-              | TRUE
+              | TRUE -- Не может ли формула быть такого вида даже вне контекста задачи функционального равенства?
               | FALSE
       deriving (Show,Eq,Read)
 
