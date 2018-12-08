@@ -70,3 +70,5 @@ vars f = delpov (vars0 f)
 
 
 solveEq :: Equation -> Maybe [Equation]
+
+---
