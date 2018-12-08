@@ -1,5 +1,6 @@
 import Data.Foldable
-data Formula =V Int
+
+data Formula = V Int
                | C Int
                | Not Formula
                | Conj {
@@ -10,6 +11,8 @@ data Formula =V Int
                         l :: Formula ,
                         r ::  Formula
                       }
+              | TRUE -- Не может ли формула быть такого вида даже вне контекста задачи функционального равенства?
+              | FALSE
       deriving (Show,Eq,Read)
 
 
@@ -18,6 +21,20 @@ data Equation = Eq {
                       re :: Formula
                    }
       deriving (Show,Eq,Read)
+
+data Value = T | F | N  deriving (Show, Eq, Read)
+
+data Predicate = Synt Formula Formula
+               | Incl Formula Formula
+               | Func Formula Formula
+      deriving (Show, Eq, Read)
+
+data Condition = P Predicate
+               | Bar   Condition
+               | Wedge Condition Condition
+               | Vee   Condition Condition
+      deriving (Show, Eq, Read)
+
 
 -- Алгоритм 1 сведение к системе простейших
 
@@ -69,32 +86,52 @@ vars f = delpov (vars0 f)
 -- Алгоритм 3 Выражение переменных и констант из уравнения
 
 
-solveEq :: Equation -> Maybe [Equation]
-solveEq e =
-      where
-      solve1 e | eqToSys e == [] = Nothing
-               | otherwise == Just (eqToSys)
-      solve2 e | check1 e == False = Nothing
-               | otherwise = Just  (del1 e)
-                  where
+--solveEq :: Equation -> Maybe [Equation]
+
+---
+
+-- Алгоритм 4 Проверка предиката синтаксического равенства (пока только для одного выражения)
+
+syntPred :: Formula -> Formula -> [Equation] -> Value
+syntPred = undefined
+{-syntPred f g e:es | asd == [] = F
+                | e:es == [] && asd' == [] = T
+                | e:es == [] && asd' != [] = N
+                | e:es
+      where asd  = eqToSys (Equation f g)
+            asd' = purge asd
+            purge :: [Equation] -> [Equation]
+            purge [] = []
+            purge a:as = if (l a == r a) then (purge as) else (a : purge as)
+-}
+
+-- Алгоритм 5 Проверка подформульного предиката (пока только для одного выражения)
+
+inclPred :: Formula -> Formula -> [Equation] -> Value
+inclPred f (V    x)     es = syntPred f (V x) es
+inclPred f (C    c)     es = syntPred f (C c) es
+inclPred f (Not  g)     es = inclPred f  g    es
+inclPred f (Conj g1 g2) es | q1 == T || q2 == T = T
+                           | q1 == N || q2 == N = N
+                           | otherwise          = F
+      where q1 = inclPred f g1 es
+            q2 = inclPred f g2 es
 
 
-      solve3 Nothing = Nothing
-      solve3 (Just [x]) =Just [x]
-      solve3 (Just (x:xs)) | (check2 x xs) && (solveEq (putInEq (find1 x xs) x) == Nothing) = Nothing
-                           | (check2 x xs) && (solveEq (putInEq (find1 x xs) x) /= Nothing) = solve3 (msum (Just (map putInEq (find1 x xs) xs)) (solveEq (putInEq (find1 x xs) x)))
-                           | otherwise = msum (Just [x]) (solve3 (Just xs))
-                               where
-                                 msum _ Nothing = Nothing
-                                 msum Nothing _ = Nothing
-                                 msum (Just x) (Just y) = Just (x ++ y)
-                                 check2 (Eq (V a) x) [(Eq (V b) y)] | a==b =True
-                                                                    | otherwise = False
-                                 check2 (Eq (V a) x) (x:xs) = (check2 (Eq (V a) x) [x]) || (check2 (Eq (V a) x) xs)
-                                 check2 _ _ =False
-                                 find1 x [] = C 1
-                                 find1 x [y] | check2 x [y] = y
-                                             | otherwise =C 1
-                                 find1 x (y:ys) |  check2 x [y]  = y
-                                                | otherwise = find1 x ys
-      solve4
+-- Упрощение формулы с использованием эквивалентностей (не стал на всякий случай много чего писать)
+
+simplify :: Formula -> (Formula, Int)
+-- Не написаны упрощения для формул типа Conj TRUE FALSE и т.д.
+simplify (Not (Not f))  = (f, 1)
+simplify (Conj f TRUE)  = (f, 1)
+simplify (Conj f FALSE) = (FALSE, 1)
+simplify (Disj f TRUE)  = (TRUE, 1)
+simplify (Disj f FALSE) = (f, 1)
+simplify (Conj f g) | f == g     = (f, 1)
+                    | f == Not g = (FALSE, 1)
+simplify (Disj f g) | f == g     = (f, 1)
+                    | f == Not g = (TRUE, 1)
+simplify (Conj f (Disj g h)) | g == f || h == f = (f, 1)
+simplify (Disj f (Conj g h)) | g == f || h == f = (f, 1)
+-- Для всех определений функции выше, кроме 1ой, 6ой и 7о1 надо ещё писать определение для зеркальной ситуации типа Conj TRUE f
+simplify f = (f, 0)
