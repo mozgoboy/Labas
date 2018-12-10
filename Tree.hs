@@ -1,5 +1,6 @@
 import Data.Foldable
 
+-- Formula definition
 data Formula = V Int
                | C Int
                | Not Formula
@@ -11,30 +12,93 @@ data Formula = V Int
                         l :: Formula ,
                         r ::  Formula
                       }
-              | TRUE -- Не может ли формула быть такого вида даже вне контекста задачи функционального равенства?
+              | TRUE
               | FALSE
-      deriving (Show,Eq,Read)
+      deriving (Read)
+
+instance Show Formula where
+    show TRUE       = "TRUE"
+    show FALSE      = "FALSE"
+    show (V x)      = "V " ++ show x
+    show (C c)      = "C " ++ show c
+    show (Not  f)   = "~(" ++ show f ++ ")"
+    show (Conj f g) = "("  ++ show f ++ ") & ("  ++ show g ++ ")"
+    show (Disj f g) = "("  ++ show f ++ ") || (" ++ show g ++ ")"
+
+instance Eq Formula where
+    TRUE  == TRUE   =  True
+    FALSE == FALSE  =  True
+    TRUE  == FALSE  =  False
+    FALSE == TRUE   =  False
+    (V _) == (C _)  =  False
+    (V x) == (V y)  =  (x == y)
+    (C a) == (C b)  =  (a == b)
+    (Not  f)     == (Not  g)      =  (f == g)
+    (Not  _)     ==       _       =  False
+    _            == (Not  g)      =  False
+    (Conj _  _ ) == (Disj _  _ )  =  False
+    (Disj _  _ ) == (Conj _  _ )  =  False
+    (Conj f1 g1) == (Conj f2 g2)  =  ((f1 == f2) && (g1 == g2)) || ((f1 == g2) && (g1 == f2))
+    (Disj f1 g1) == (Disj f2 g2)  =  ((f1 == f2) && (g1 == g2)) || ((f1 == g2) && (g1 == f2))
 
 
+-- Equation definition
 data Equation = Eq {
                       le :: Formula ,
                       re :: Formula
                    }
-      deriving (Show,Eq,Read)
+      deriving (Read)
 
-data Value = T | F | N  deriving (Show, Eq, Read)
+instance Show Equation where
+    show (Eq f g) = show f ++ " = " ++ show g
 
+instance Eq Equation where
+    (Eq f1 g1) == (Eq f2 g2)  =  ((f1 == f2) && (g1 == g2)) || ((f1 == g2) && (g1 == f2))
+
+
+-- Predicate definition
 data Predicate = Synt Formula Formula
                | Incl Formula Formula
                | Func Formula Formula
-      deriving (Show, Eq, Read)
+      deriving (Read)
 
-data Condition = P Predicate
+instance Show Predicate where
+    show (Synt f g) = show f ++ " == "  ++ show g
+    show (Incl f g) = show f ++ " -> "  ++ show g
+    show (Func f g) = show f ++ " <=> " ++ show g
+
+instance Eq Predicate where
+    (Synt f1 g1) == (Synt f2 g2)  =  ((f1 == f2) && (g1 == g2)) || ((f1 == g2) && (g1 == f2))
+    (Incl f1 g1) == (Incl f2 g2)  =  ((f1 == f2) && (g1 == g2)) || ((f1 == g2) && (g1 == f2))
+    (Func f1 g1) == (Func f2 g2)  =  ((f1 == f2) && (g1 == g2)) || ((f1 == g2) && (g1 == f2))
+
+
+-- Condition definition
+data Condition = P     Predicate
                | Bar   Condition
                | Wedge Condition Condition
                | Vee   Condition Condition
-      deriving (Show, Eq, Read)
+      deriving (Read)
 
+instance Show Condition where
+    show (P p)         = "P " ++ show p
+    show (Bar      c ) = "~[" ++ show c  ++ "]"
+    show (Wedge c1 c2) = "["  ++ show c1 ++ "] /\\ ["  ++ show c2 ++ "]"
+    show (Vee   c1 c2) = "["  ++ show c1 ++ "] \\/ ["  ++ show c2 ++ "]"
+
+instance Eq Condition where
+    (P p1)        == (P p2)         =  (p1 == p2)
+    (Bar p1)      == (Bar p2)       =  (p1 == p2)
+    (Bar p )      ==      _         =  False
+    _             == (Bar p )       =  False
+    (Wedge _  _ ) == (Vee   _  _ )  =  False
+    (Vee   _  _ ) == (Wedge _  _ )  =  False
+    (Wedge a1 b1) == (Wedge a2 b2)  =  ((a1 == a2) && (b1 == b2)) || ((a1 == b2) && (b1 == a2))
+    (Vee   a1 b1) == (Vee   a2 b2)  =  ((a1 == a2) && (b1 == b2)) || ((a1 == b2) && (b1 == a2))
+
+
+-- Values definition
+data Value = T | F | N  deriving (Show, Eq, Read)
 
 -- Алгоритм 1 сведение к системе простейших
 
@@ -89,7 +153,7 @@ vars f = delpov (vars0 f)
 --solveEq :: Equation -> Maybe [Equation]
 
 
--- Алгоритм 4 Проверка предиката синтаксического равенства (пока только для одного выражения)
+-- Algorithm 4. Syntactic predicate checking
 
 syntPred :: Formula -> Formula -> [Equation] -> Value
 syntPred = undefined
@@ -104,7 +168,7 @@ syntPred = undefined
             purge a:as = if (l a == r a) then (purge as) else (a : purge as)
 -}
 
--- Алгоритм 5 Проверка подформульного предиката (пока только для одного выражения)
+-- Algorithm 5. Subformula predicate checking
 
 inclPred :: Formula -> Formula -> [Equation] -> Value
 inclPred f (V    x)     es = syntPred f (V x) es
@@ -117,7 +181,7 @@ inclPred f (Conj g1 g2) es | q1 == T || q2 == T = T
             q2 = inclPred f g2 es
 
 
--- Упрощение формулы с использованием эквивалентностей
+-- Reducing the formulas using simple equivalencies
 
 simplify :: Formula -> (Formula, Int)
 simplify (V x) = (V x, 0)
@@ -177,7 +241,23 @@ fullSimplify f | snd res == 1 = fullSimplify (fst res)
       where res = simplify f
 
 
--- Алгоритм 6 Проверка функционального предиката (пока только для одного выражения)
+-- Algorithm 6. Functional predicate checking
 
 funcPred :: Formula -> Formula -> [Equation] -> Value
-funcPred = undefined
+funcPred f g es | f' == g'       = T
+                | f' == (Not g') = F
+                | otherwise      = N
+    where
+        putForAll f (e:es) = putForAll (putInFormula e f) es
+        f' = fullSimplify (putForAll f es)
+        g' = fullSimplify (putForAll g es)
+
+
+-- Reducing the formulas using simple equivalencies
+
+-- MAYBE NOT NEEDED
+
+-- Alogrithm 7. Checking the whole condition for the remaining equations
+
+condCheck :: Condition -> [Equation] -> Value
+condCheck c es = undefined
