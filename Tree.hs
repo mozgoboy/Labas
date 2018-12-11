@@ -17,13 +17,23 @@ data Formula = V Int
       deriving (Read)
 
 instance Show Formula where
-    show TRUE       = "TRUE"
-    show FALSE      = "FALSE"
-    show (V x)      = "V " ++ show x
-    show (C c)      = "C " ++ show c
-    show (Not  f)   = "~(" ++ show f ++ ")"
-    show (Conj f g) = "("  ++ show f ++ ") & ("  ++ show g ++ ")"
-    show (Disj f g) = "("  ++ show f ++ ") || (" ++ show g ++ ")"
+    show TRUE           = "TRUE"
+    show FALSE          = "FALSE"
+    show (V x)          = "V " ++ show x
+    show (C c)          = "C " ++ show c
+    show (Not TRUE)     = "~TRUE"
+    show (Not FALSE)    = "~FALSE"
+    show (Not  f)       = "~(" ++ show f ++ ")"
+    show (Conj f TRUE ) =  "(" ++ show f ++ ") & TRUE"
+    show (Conj f FALSE) =  "(" ++ show f ++ ") & FALSE"
+    show (Conj TRUE  g) =  "TRUE & ("  ++ show g ++ ")"
+    show (Conj FALSE g) =  "FALSE & (" ++ show g ++ ")"
+    show (Conj f g)     =  "(" ++ show f ++ ") & ("  ++ show g ++ ")"
+    show (Disj f TRUE ) =  "(" ++ show f ++ ") || TRUE"
+    show (Disj f FALSE) =  "(" ++ show f ++ ") || FALSE"
+    show (Disj TRUE  g) =  "TRUE || ("  ++ show g ++ ")"
+    show (Disj FALSE g) =  "FALSE || (" ++ show g ++ ")"
+    show (Disj f g)     =  "(" ++ show f ++ ") || (" ++ show g ++ ")"
 
 instance Eq Formula where
     TRUE  == TRUE   =  True
@@ -73,21 +83,59 @@ instance Eq Predicate where
     (Func f1 g1) == (Func f2 g2)  =  ((f1 == f2) && (g1 == g2)) || ((f1 == g2) && (g1 == f2))
 
 
+    -- Values definition
+data Value = T | F | N  deriving (Show, Eq, Read)
+
+neg :: Value -> Value
+neg T = F
+neg F = T
+neg N = N
+
+add :: Value -> Value -> Value
+add N _ = N
+add _ N = N
+add F F = F
+add F T = F
+add T F = F
+add T T = T
+
+mult :: Value -> Value -> Value
+mult N _ = N
+mult _ N = N
+mult F F = F
+mult F T = T
+mult T F = T
+mult T T = T
+
+
 -- Condition definition
-data Condition = P     Predicate
+data Condition = Val   Value
+               | P     Predicate
                | Bar   Condition
-               | Wedge Condition Condition
-               | Vee   Condition Condition
+               | Wedge Condition Condition  -- f /\ g
+               | Vee   Condition Condition  -- f \/ g
       deriving (Read)
 
 instance Show Condition where
-    show (P p)         = "P " ++ show p
-    show (Bar      c ) = "~[" ++ show c  ++ "]"
-    show (Wedge c1 c2) = "["  ++ show c1 ++ "] /\\ ["  ++ show c2 ++ "]"
-    show (Vee   c1 c2) = "["  ++ show c1 ++ "] \\/ ["  ++ show c2 ++ "]"
+    show (Val v)            = show v
+    show (P p)              = show p
+    show (Bar (Val v))      = "~"  ++ show v
+    show (Bar   (P p))      = "~"  ++ show p
+    show (Bar      c )      = "~[" ++ show c  ++ "]"
+    show (Wedge (Val v) c2) =  show v ++ " /\\ ["  ++ show c2 ++ "]"
+    show (Wedge   (P p) c2) =  show p ++ " /\\ ["  ++ show c2 ++ "]"
+    show (Wedge c1 (Val v)) =  "[" ++ show c1 ++ "] /\\ "  ++ show v
+    show (Wedge c1   (P p)) =  "[" ++ show c1 ++ "] /\\ "  ++ show p
+    show (Wedge c1      c2) =  "[" ++ show c1 ++ "] /\\ [" ++ show c2 ++ "]"
+    show (Vee   (Val v) c2) =  show v  ++ " \\/  ["  ++ show c2 ++ "]"
+    show (Vee   (P p)   c2) =  show p  ++ " \\/  ["  ++ show c2 ++ "]"
+    show (Vee   c1 (Val v)) =  "[" ++ show c1 ++ "] \\/  "  ++ show v
+    show (Vee   c1   (P p)) =  "[" ++ show c1 ++ "] \\/  "  ++ show p
+    show (Vee   c1      c2) =  "[" ++ show c1 ++ "] \\/ [" ++ show c2 ++ "]"
 
 instance Eq Condition where
     (P p1)        == (P p2)         =  (p1 == p2)
+    (Val v1)      == (Val v2)       =  (v1 == v2)
     (Bar p1)      == (Bar p2)       =  (p1 == p2)
     (Bar p )      ==      _         =  False
     _             == (Bar p )       =  False
@@ -96,9 +144,6 @@ instance Eq Condition where
     (Wedge a1 b1) == (Wedge a2 b2)  =  ((a1 == a2) && (b1 == b2)) || ((a1 == b2) && (b1 == a2))
     (Vee   a1 b1) == (Vee   a2 b2)  =  ((a1 == a2) && (b1 == b2)) || ((a1 == b2) && (b1 == a2))
 
-
--- Values definition
-data Value = T | F | N  deriving (Show, Eq, Read)
 
 -- Алгоритм 1 сведение к системе простейших
 
@@ -174,71 +219,72 @@ inclPred :: Formula -> Formula -> [Equation] -> Value
 inclPred f (V    x)     es = syntPred f (V x) es
 inclPred f (C    c)     es = syntPred f (C c) es
 inclPred f (Not  g)     es = inclPred f  g    es
-inclPred f (Conj g1 g2) es | q1 == T || q2 == T = T
-                           | q1 == N || q2 == N = N
-                           | otherwise          = F
+inclPred f (Conj g1 g2) es | q1 == T || q2 == T  =  T
+                           | q1 == N || q2 == N  =  N
+                           | otherwise           =  F
       where q1 = inclPred f g1 es
             q2 = inclPred f g2 es
+inclPred f (Disj g1 g2) es = inclPred f (Conj g1 g2) es
+inclPred f g es = inclPred g f es
 
 
 -- Reducing the formulas using simple equivalencies
 
-simplify :: Formula -> (Formula, Int)
-simplify (V x) = (V x, 0)
-simplify (C c) = (C c, 0)
-simplify TRUE  = (TRUE , 0)
-simplify FALSE = (FALSE, 0)
+rdcForm :: Formula -> (Formula, Int)
+rdcForm (V x) = (V x, 0)
+rdcForm (C c) = (C c, 0)
+rdcForm TRUE  = (TRUE , 0)
+rdcForm FALSE = (FALSE, 0)
 
-simplify (Not  FALSE) = (TRUE , 1)
-simplify (Not  TRUE ) = (FALSE, 1)
+rdcForm (Not  FALSE) = (TRUE , 1)
+rdcForm (Not  TRUE ) = (FALSE, 1)
 
-simplify (Conj FALSE FALSE) = (FALSE, 1)
-simplify (Conj FALSE TRUE ) = (FALSE, 1)
-simplify (Conj TRUE  FALSE) = (FALSE, 1)
-simplify (Conj TRUE  TRUE ) = (TRUE , 1)
+rdcForm (Conj FALSE FALSE) = (FALSE, 1)
+rdcForm (Conj FALSE TRUE ) = (FALSE, 1)
+rdcForm (Conj TRUE  FALSE) = (FALSE, 1)
+rdcForm (Conj TRUE  TRUE ) = (TRUE , 1)
 
-simplify (Disj FALSE FALSE) = (FALSE, 1)
-simplify (Disj FALSE TRUE ) = (TRUE , 1)
-simplify (Disj TRUE  FALSE) = (TRUE , 1)
-simplify (Disj TRUE  TRUE ) = (TRUE , 1)
+rdcForm (Disj FALSE FALSE) = (FALSE, 1)
+rdcForm (Disj FALSE TRUE ) = (TRUE , 1)
+rdcForm (Disj TRUE  FALSE) = (TRUE , 1)
+rdcForm (Disj TRUE  TRUE ) = (TRUE , 1)
 
-simplify (Not (Not f))  = (f, 1)
-simplify (Not      f )  = (Not (fst res), snd res)
-      where res = simplify f
+rdcForm (Not (Not f))  = (f, 1)
+rdcForm (Not      f )  = (Not (fst res), snd res)
+      where res = rdcForm f
 
-simplify (Conj f  TRUE) = (f, 1)
-simplify (Conj TRUE  f) = (f, 1)
-simplify (Conj f FALSE) = (FALSE, 1)
-simplify (Conj FALSE f) = (FALSE, 1)
+rdcForm (Conj f  TRUE) = (f, 1)
+rdcForm (Conj TRUE  f) = (f, 1)
+rdcForm (Conj f FALSE) = (FALSE, 1)
+rdcForm (Conj FALSE f) = (FALSE, 1)
 
-simplify (Disj f  TRUE) = (TRUE, 1)
-simplify (Disj TRUE  f) = (TRUE, 1)
-simplify (Disj f FALSE) = (f, 1)
-simplify (Disj FALSE f) = (f, 1)
+rdcForm (Disj f  TRUE) = (TRUE, 1)
+rdcForm (Disj TRUE  f) = (TRUE, 1)
+rdcForm (Disj f FALSE) = (f, 1)
+rdcForm (Disj FALSE f) = (f, 1)
 
-simplify (Conj f (Not g))       | f == g = (FALSE, 1)
-simplify (Conj (Not g) f)       = simplify (Conj f (Not g))
-simplify (Conj f (Disj g h))    | g == f || h == f = (f, 1)
-simplify (Conj (Disj g h) f)    = simplify (Conj f (Disj g h))
-simplify (Conj f g) | f == g    = (f, 1)
-                    | otherwise = (Conj (fst resf) (fst resg), max (snd resf) (snd resg))
-      where resf = simplify f
-            resg = simplify g
+rdcForm (Conj f (Not g))       | f == g  =  (FALSE, 1)
+rdcForm (Conj (Not g) f)       = rdcForm (Conj f (Not g))
+rdcForm (Conj f (Disj g h))    | g == f || h == f  =  (f, 1)
+rdcForm (Conj (Disj g h) f)    = rdcForm (Conj f (Disj g h))
+rdcForm (Conj f g) | f == g    = (f, 1)
+                   | otherwise = (Conj (fst resf) (fst resg), max (snd resf) (snd resg))
+      where resf = rdcForm f
+            resg = rdcForm g
 
-simplify (Disj f (Not g))       | f == g = (TRUE, 1)
-simplify (Disj (Not g) f)       = simplify (Disj f (Not g))
-simplify (Disj f (Conj g h))    | g == f || h == f = (f, 1)
-simplify (Disj (Conj g h) f)    = simplify (Disj f (Conj g h))
-simplify (Disj f g) | f == g    = (f, 1)
-                    | otherwise = (Disj (fst resf) (fst resg), max (snd resf) (snd resg))
-      where resf = simplify f
-            resg = simplify g
+rdcForm (Disj f (Not g))       | f == g  =  (TRUE, 1)
+rdcForm (Disj (Not g) f)       = rdcForm (Disj f (Not g))
+rdcForm (Disj f (Conj g h))    | g == f || h == f  =  (f, 1)
+rdcForm (Disj (Conj g h) f)    = rdcForm (Disj f (Conj g h))
+rdcForm (Disj f g) | f == g    = (f, 1)
+                   | otherwise = (Disj (fst resf) (fst resg), max (snd resf) (snd resg))
+      where resf = rdcForm f
+            resg = rdcForm g
 
-
-fullSimplify :: Formula -> Formula
-fullSimplify f | snd res == 1 = fullSimplify (fst res)
-               | otherwise    = f
-      where res = simplify f
+fullRdcForm :: Formula -> Formula
+fullRdcForm f | snd res == 1 = fullRdcForm (fst res)
+              | otherwise    = f
+      where res = rdcForm f
 
 
 -- Algorithm 6. Functional predicate checking
@@ -249,15 +295,17 @@ funcPred f g es | f' == g'       = T
                 | otherwise      = N
     where
         putForAll f (e:es) = putForAll (putInFormula e f) es
-        f' = fullSimplify (putForAll f es)
-        g' = fullSimplify (putForAll g es)
+        f' = fullRdcForm (putForAll f es)
+        g' = fullRdcForm (putForAll g es)
 
-
--- Reducing the formulas using simple equivalencies
-
--- MAYBE NOT NEEDED
 
 -- Alogrithm 7. Checking the whole condition for the remaining equations
 
 condCheck :: Condition -> [Equation] -> Value
-condCheck c es = undefined
+condCheck (Val v)        es = v
+condCheck (P (Synt f g)) es = syntPred f g es
+condCheck (P (Incl f g)) es = inclPred f g es
+condCheck (P (Func f g)) es = funcPred f g es
+condCheck (Bar c)        es = neg  (condCheck c  es)
+condCheck (Wedge c1 c2)  es = add  (condCheck c1 es) (condCheck c2 es)
+condCheck (Vee   c1 c2)  es = mult (condCheck c1 es) (condCheck c2 es)
