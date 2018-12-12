@@ -52,6 +52,7 @@ instance Eq Formula where
     (Disj f1 g1) == (Disj f2 g2)  =  ((f1 == f2) && (g1 == g2)) || ((f1 == g2) && (g1 == f2))
 
 
+
 -- Equation definition
 data Equation = Eq {
                       le :: Formula ,
@@ -91,20 +92,20 @@ neg T = F
 neg F = T
 neg N = N
 
-add :: Value -> Value -> Value
+add :: Value -> Value -> Value -- Value || Value
 add N _ = N
 add _ N = N
 add F F = F
-add F T = F
-add T F = F
+add F T = T
+add T F = T
 add T T = T
 
-mult :: Value -> Value -> Value
+mult :: Value -> Value -> Value -- Value && Value
 mult N _ = N
 mult _ N = N
 mult F F = F
-mult F T = T
-mult T F = T
+mult F T = F
+mult T F = F
 mult T T = T
 
 
@@ -197,6 +198,38 @@ vars f = delpov (vars0 f)
 
 --solveEq :: Equation -> Maybe [Equation]
 
+solve1 :: Equation -> Maybe [Equation]
+solve1 e | eqToSys e ==[] = Nothing
+         | otherwise = Just (eqToSys e)
+
+solve2 :: Maybe [Equation] -> Maybe [Equation]
+solve2 Nothing = Nothing
+solve2 (Just e) | check1 e = Just (del (e)) 
+                | otherwise = Nothing
+                  where check1 [(Eq (C a) (Not _))] =False
+                        check1 [(Eq (C a) (Disj _ _ ))] = False
+                        check1 [(Eq (C a) (Conj _ _ ))] = False
+                        check1 [(Eq _ _)] = True
+                        check1 (a:as) = (check1 [a] && check1 as)
+                        del [(Eq (C a) (C b))] | a==b = []
+                                               | otherwise = [(Eq (C a) (C b))]
+                        del [(Eq (V a) (V b))] | a==b = []
+                                               | otherwise = [(Eq (V a) (V b))]                       
+                        del [x] = [x]                       
+                        del (a:as) = (del [a]) ++ (del as)   
+
+solve3 Nothing = Nothing
+solve3 (Just e) | check2 e = Nothing
+                | otherwise =Just e
+                   where check2 [(Eq (V a) f)] = elem (V a) (vars f) 
+                         check2 (a:as) = (check2 [a]) && (check2 as)    
+solve4 Nothing = Nothing
+solve4 (Just e) = (Just (del1 e))
+           where del1 [x]  = [x]
+                 del1 (a:as) | elem a as = del1 as
+                             | otherwise = [a] ++ (del1 as)
+
+--
 
 -- Algorithm 4. Syntactic predicate checking
 
@@ -218,14 +251,15 @@ syntPred = undefined
 inclPred :: Formula -> Formula -> [Equation] -> Value
 inclPred f (V    x)     es = syntPred f (V x) es
 inclPred f (C    c)     es = syntPred f (C c) es
-inclPred f (Not  g)     es = inclPred f  g    es
-inclPred f (Conj g1 g2) es | q1 == T || q2 == T  =  T
-                           | q1 == N || q2 == N  =  N
-                           | otherwise           =  F
+inclPred f (Not  g)     es = inclPred f  g    es 
+inclPred f (Conj g1 g2) es | syntPred f (Conj g1 g2) es == T = T
+                           | otherwise                       = add q1 q2
       where q1 = inclPred f g1 es
             q2 = inclPred f g2 es
-inclPred f (Disj g1 g2) es = inclPred f (Conj g1 g2) es
-inclPred f g es = inclPred g f es
+inclPred f (Disj g1 g2) es | syntPred f (Disj g1 g2) es == T = T
+                           | otherwise                       = add q1 q2
+      where q1 = inclPred f g1 es
+            q2 = inclPred f g2 es
 
 
 -- Reducing the formulas using simple equivalencies
