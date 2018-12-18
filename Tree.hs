@@ -229,7 +229,6 @@ solve4 (Just e) = (Just (del1 e))
                  del1 (a:as) | elem a as = del1 as
                              | otherwise = [a] ++ (del1 as)
 
---сас
 
 
 -- Algorithm 4. Syntactic predicate checking
